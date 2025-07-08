@@ -4,5 +4,4 @@ I was really bored and wanted something fun to do that could distract me from ot
 I hope I end up finishing it.
 
 Created using lichess-bot:
-
 Pantidis, I., Harrison, M., Choksi, S., & Duplessis, T. lichess-bot [Computer software]. https://github.com/lichess-bot-devs/lichess-bot
