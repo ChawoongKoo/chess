@@ -94,10 +94,3 @@ class ComboEngine(ExampleEngine):
             possible_moves.sort(key=str)
             move = possible_moves[0]
         return PlayResult(move, None, draw_offered=draw_offered)
-
-
-class MiniMax(MinimalEngine):
-    """Minimax algorithm"""
-
-    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
-        return PlayResult(move=random.choice(list(board.legal_moves)), ponder=None)
