@@ -9,6 +9,8 @@ import random
 from lib.engine_wrapper import MinimalEngine
 from lib.lichess_types import MOVE, HOMEMADE_ARGS_TYPE
 import logging
+import math
+from engines.piece_value import value
 
 
 # Use this logger variable to print messages to the console or log files.
@@ -94,3 +96,74 @@ class ComboEngine(ExampleEngine):
             possible_moves.sort(key=str)
             move = possible_moves[0]
         return PlayResult(move, None, draw_offered=draw_offered)
+
+
+class MiniMax(MinimalEngine):
+    """Minimax algorithm"""
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        best_move = None
+        if board.turn:
+            max_move_score = -math.inf
+            logger.info(f"{list(board.legal_moves)}")
+            for move in board.legal_moves:
+                board.push(move)
+                move_score = self.maxi(board=board, depth=2)
+                max_move_score = max(move_score, max_move_score)
+                best_move = move
+                board.pop()
+        else:
+            min_max_score = math.inf
+            for move in board.legal_moves:
+                board.push(move)
+                move_score = self.mini(board=board, depth=2)
+                min_max_score = min(move_score, min_max_score)
+                best_move = move
+                board.pop()
+        logger.info(f"Best move: {board.san(best_move)}")
+        return PlayResult(move=best_move, ponder=None)
+        
+
+    def maxi(self, board: chess.Board, depth: int) -> float:
+        """Maximizes the minimum score of each possible move"""
+
+        if depth == 0:
+            return self.evaluate(board=board)
+        
+        minimum = -math.inf
+        for move in board.legal_moves:
+            board.push(move)
+            move_score = self.mini(board=board, depth=depth-1)
+            
+            if move_score > minimum:
+                minimum = move_score
+            board.pop()
+        return minimum
+    
+
+    def mini(self, board: chess.Board, depth: int) -> float:
+        """Minimizes the maximum score of each possible move"""
+
+        if depth == 0:
+            return self.evaluate(board=board)
+        
+        maximum = math.inf
+        for move in board.legal_moves:
+            board.push(move)
+            move_score = self.maxi(board=board, depth=depth-1)
+            
+            if move_score < maximum:
+                maximum = move_score
+            board.pop()
+        return maximum
+
+
+    
+    def evaluate(self, board: chess.Board) -> float:
+        score = 0
+        for piece in board.piece_map().values():
+            if board.turn:
+                score += value(piece.piece_type)
+            else:
+                score -= value(piece.piece_type)
+        return score
