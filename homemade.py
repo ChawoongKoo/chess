@@ -11,6 +11,7 @@ from lib.lichess_types import MOVE, HOMEMADE_ARGS_TYPE
 import logging
 import math
 from engines.piece_value import value
+from engines.evaluate import evaluate
 
 
 # Use this logger variable to print messages to the console or log files.
@@ -108,7 +109,7 @@ class MiniMax(MinimalEngine):
             logger.info(f"{list(board.legal_moves)}")
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.maxi(board=board, depth=2)
+                move_score = self.maxi(board=board, depth=3)
                 max_move_score = max(move_score, max_move_score)
                 best_move = move
                 board.pop()
@@ -116,7 +117,7 @@ class MiniMax(MinimalEngine):
             min_max_score = math.inf
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.mini(board=board, depth=2)
+                move_score = self.mini(board=board, depth=3)
                 min_max_score = min(move_score, min_max_score)
                 best_move = move
                 board.pop()
@@ -128,7 +129,8 @@ class MiniMax(MinimalEngine):
         """Maximizes the minimum score of each possible move"""
 
         if depth == 0:
-            return self.evaluate(board=board)
+            logger.info(f"Eval: {evaluate(board=board)}")
+            return evaluate(board=board)
         
         minimum = -math.inf
         for move in board.legal_moves:
@@ -145,7 +147,8 @@ class MiniMax(MinimalEngine):
         """Minimizes the maximum score of each possible move"""
 
         if depth == 0:
-            return self.evaluate(board=board)
+            logger.info(f"Eval: {evaluate(board=board)}")
+            return evaluate(board=board)
         
         maximum = math.inf
         for move in board.legal_moves:
@@ -156,14 +159,3 @@ class MiniMax(MinimalEngine):
                 maximum = move_score
             board.pop()
         return maximum
-
-
-    
-    def evaluate(self, board: chess.Board) -> float:
-        score = 0
-        for piece in board.piece_map().values():
-            if board.turn:
-                score += value(piece.piece_type)
-            else:
-                score -= value(piece.piece_type)
-        return score
