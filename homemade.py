@@ -108,65 +108,84 @@ class MiniMax(MinimalEngine):
     """Minimax algorithm"""
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
-        best_move = None
-        max_move_score = 0
+        best_move = None #Logger variable
+        best_score = 0 #Logger variable
+        alpha = -math.inf
+        beta = math.inf
+
         if board.turn:
             max_move_score = -math.inf
-            logger.info(f"{list(board.legal_moves)}")
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.maxi(board=board, depth=homemade_depth)
+                move_score = self.maxi(board=board, alpha=alpha, beta=beta, depth=homemade_depth)
                 if move_score > max_move_score:
                     best_move = move
                     max_move_score = move_score
                 board.pop()
+            best_score = max_move_score
         else:
             min_move_score = math.inf
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.mini(board=board, depth=homemade_depth)
+                move_score = self.mini(board=board, alpha=alpha, beta=beta, depth=homemade_depth)
                 if move_score < min_move_score:
                     min_move_score = move_score
                     best_move = move
                 board.pop()
-        logger.info(f"score: {max_move_score}")
+            best_score = min_move_score
+        
         logger.info(f"Best move: {board.san(best_move)}")
+        logger.info(f"Best score: {best_score}")
+        board.push(best_move)
+        logger.info(f"Current board eval: {evaluate(board=board)}")
         return PlayResult(move=best_move, ponder=None)
         
 
-    def maxi(self, board: chess.Board, depth: int) -> float:
-        """Maximizes the minimum score of each possible move"""
+    def maxi(self, board: chess.Board, alpha: float, beta: float, depth: int) -> float:
+        """Chooses the best score amongs each legal move (Maximum score)"""
 
         if depth == 0:
-            logger.info(f"Last move: {board.move_stack[-1]}")
-            logger.info(f"Eval: {evaluate(board=board)}")
             return evaluate(board=board)
         
-        minimum = -math.inf
+        best_score = -math.inf
         for move in board.legal_moves:
             board.push(move)
-            move_score = self.mini(board=board, depth=depth-1)
-            
-            if move_score > minimum:
-                minimum = move_score
+            move_score = self.mini(board=board, alpha=alpha, beta=beta, depth=depth-1)
             board.pop()
-        return minimum
+
+            if move_score > best_score:
+                """Choose the highest score of the minimums"""
+                best_score = move_score
+            
+            """Determine a new lower bound -> this node's value >= alpha"""
+            alpha = max(best_score, alpha)
+
+            if beta <= alpha:
+                """If we know the minimizer will choose a value less than our current lower bound, we leave this node"""
+                break
+        return best_score
     
 
-    def mini(self, board: chess.Board, depth: int) -> float:
-        """Minimizes the maximum score of each possible move"""
+    def mini(self, board: chess.Board, alpha: float, beta: float, depth: int) -> float:
+        """Chooses the best score among each legal move (Minimum score)"""
 
         if depth == 0:
-            logger.info(f"Last move: {board.move_stack[-1]}")
-            logger.info(f"Eval: {evaluate(board=board)}")
             return evaluate(board=board)
         
-        maximum = math.inf
+        best_score = math.inf
         for move in board.legal_moves:
             board.push(move)
-            move_score = self.maxi(board=board, depth=depth-1)
-            
-            if move_score < maximum:
-                maximum = move_score
+            move_score = self.maxi(board=board, alpha=alpha, beta=beta, depth=depth-1)
             board.pop()
-        return maximum
+            
+            if move_score < best_score:
+                """Choose the lowest score of the maximums"""
+                best_score = move_score
+            
+            """Determine a new upper bound -> this node's value <= beta"""
+            beta = min(best_score, beta)
+
+            if beta <= alpha:
+                """If we know that the maximizer will choose a value greater than our current upper bound, we leave this node"""
+                break
+        return best_score
