@@ -10,23 +10,27 @@ def evaluate(board: chess.Board) -> float:
         else:
             score -= value(piece.piece_type)
 
-    score += mobility_both_sides(board=board)
+    score += mobility_both_sides(board=board)*.1
     return score
 
 def mobility_both_sides(board: chess.Board) -> float:
     score = 0
+    white_mobility = 0
+    black_mobility = 0
     if board.turn:
-        score += board.legal_moves.count()
+        white_mobility = board.legal_moves.count()
         board.turn = not board.turn
-        score -= board.legal_moves.count()
+        black_mobility = board.legal_moves.count()
         board.turn = not board.turn
     else:
-        score -= board.legal_moves.count()
+        black_mobility = board.legal_moves.count()
         board.turn = not board.turn
-        score += board.legal_moves.count()
+        white_mobility = board.legal_moves.count()
         board.turn = not board.turn
-
+    
+    score = white_mobility - black_mobility
     return score
+
 # def evaluate(board: chess.Board) -> float:
 #     score = 0
 #     for piece in board.piece_map().values():
