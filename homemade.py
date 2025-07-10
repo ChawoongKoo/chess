@@ -12,12 +12,17 @@ import logging
 import math
 from engines.piece_value import value
 from engines.evaluate import evaluate
+import yaml
 
 
 # Use this logger variable to print messages to the console or log files.
 # logger.info("message") will always print "message" to the console or log file.
 # logger.debug("message") will only print "message" if verbose logging is enabled.
 logger = logging.getLogger(__name__)
+
+with open("config.yml", "r") as file:
+    config = yaml.safe_load(file)
+homemade_depth = config["engine"]["homemade_options"]["depth"]
 
 
 class ExampleEngine(MinimalEngine):
@@ -104,23 +109,27 @@ class MiniMax(MinimalEngine):
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
         best_move = None
+        max_move_score = 0
         if board.turn:
             max_move_score = -math.inf
             logger.info(f"{list(board.legal_moves)}")
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.maxi(board=board, depth=3)
-                max_move_score = max(move_score, max_move_score)
-                best_move = move
+                move_score = self.maxi(board=board, depth=homemade_depth)
+                if move_score > max_move_score:
+                    best_move = move
+                    max_move_score = move_score
                 board.pop()
         else:
-            min_max_score = math.inf
+            min_move_score = math.inf
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.mini(board=board, depth=3)
-                min_max_score = min(move_score, min_max_score)
-                best_move = move
+                move_score = self.mini(board=board, depth=homemade_depth)
+                if move_score < min_move_score:
+                    min_move_score = move_score
+                    best_move = move
                 board.pop()
+        logger.info(f"score: {max_move_score}")
         logger.info(f"Best move: {board.san(best_move)}")
         return PlayResult(move=best_move, ponder=None)
         
@@ -129,6 +138,7 @@ class MiniMax(MinimalEngine):
         """Maximizes the minimum score of each possible move"""
 
         if depth == 0:
+            logger.info(f"Last move: {board.move_stack[-1]}")
             logger.info(f"Eval: {evaluate(board=board)}")
             return evaluate(board=board)
         
@@ -147,6 +157,7 @@ class MiniMax(MinimalEngine):
         """Minimizes the maximum score of each possible move"""
 
         if depth == 0:
+            logger.info(f"Last move: {board.move_stack[-1]}")
             logger.info(f"Eval: {evaluate(board=board)}")
             return evaluate(board=board)
         
