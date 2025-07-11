@@ -8,3 +8,4 @@ lichess_bot_auto_logs/*
 *.txt
 TEMP/*
 .DS_Store
+old_files/
