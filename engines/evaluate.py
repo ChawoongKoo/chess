@@ -19,8 +19,8 @@ import math
 
 #     return score
 
-def evaluate(board: chess.Board) -> float:
-    """Evaluates score of the current board"""
+def basic_evaluate(board: chess.Board) -> float:
+    """Evaluates score of the current board, absolute (white winning -> positive)"""
     if board.is_checkmate():
         return -math.inf if board.turn else math.inf
     score = 0
@@ -30,6 +30,22 @@ def evaluate(board: chess.Board) -> float:
 
     white_mobility, black_mobility = mobility_score(board=board)
     score += (white_mobility - black_mobility)*.1
+    return score
+
+
+def relative_evaluate(board: chess.Board) -> float:
+    score = 0
+
+    # Add up piece values
+    white_pieces, black_pieces = piece_score(board=board)
+    score += white_pieces - black_pieces
+
+    # Add up number of legal moves
+    white_mobility, black_mobility = mobility_score(board=board)
+    score += (white_mobility-black_mobility)*.1
+
+    if not board.turn:
+        score *= -1
     return score
 
 

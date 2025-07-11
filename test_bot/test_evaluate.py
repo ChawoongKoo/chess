@@ -1,13 +1,13 @@
 import chess
-from engines.evaluate import evaluate, mobility_score, piece_score
+from engines.evaluate import basic_evaluate, mobility_score, piece_score
 from homemade import MiniMax
 import unittest.mock as mock
 
 def test_starting_board() -> None:
     """Assert both sides are equal at the start of the game"""
-    
+
     board = chess.Board()
-    assert evaluate(board=board) == 0
+    assert basic_evaluate(board=board) == 0
 
 def test_mobility_scoring() -> None:
     """Assert that the side with more legal moves -> more mobility has an advantage"""
@@ -26,7 +26,7 @@ def test_mobility_scoring() -> None:
     assert low_black == high_black
 
 
-    assert evaluate(low_mobility) < evaluate(high_mobility)
+    assert basic_evaluate(low_mobility) < basic_evaluate(high_mobility)
 
 def test_piece_scoring() -> None:
     """Assert that the side with more pieces has an advantage"""
@@ -37,4 +37,4 @@ def test_piece_scoring() -> None:
     white_pieces, black_pieces = piece_score(board=board)
 
     assert white_pieces > black_pieces
-    assert evaluate(board=board) > 0
+    assert basic_evaluate(board=board) > 0
