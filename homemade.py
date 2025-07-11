@@ -108,6 +108,7 @@ class MiniMax(MinimalEngine):
     """Minimax algorithm"""
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        logger.info(f"Pre move eval: {evaluate(board=board)}")
         best_move = None #Logger variable
         best_score = 0 #Logger variable
         alpha = -math.inf
@@ -137,7 +138,7 @@ class MiniMax(MinimalEngine):
         logger.info(f"Best move: {board.san(best_move)}")
         logger.info(f"Best score: {best_score}")
         board.push(best_move)
-        logger.info(f"Current board eval: {evaluate(board=board)}")
+        logger.info(f"Post move: {evaluate(board=board)}")
         return PlayResult(move=best_move, ponder=None)
         
 
@@ -154,14 +155,14 @@ class MiniMax(MinimalEngine):
             board.pop()
 
             if move_score > best_score:
-                """Choose the highest score of the minimums"""
+                # Choose the highest score of the minimums
                 best_score = move_score
             
-            """Determine a new lower bound -> this node's value >= alpha"""
+            # Determine a new lower bound -> this node's value >= alpha
             alpha = max(best_score, alpha)
 
             if beta <= alpha:
-                """If we know the minimizer will choose a value less than our current lower bound, we leave this node"""
+                # If we know the minimizer will choose a value less than our current lower bound, we leave this node
                 break
         return best_score
     
@@ -179,13 +180,13 @@ class MiniMax(MinimalEngine):
             board.pop()
             
             if move_score < best_score:
-                """Choose the lowest score of the maximums"""
+                # Choose the lowest score of the maximums
                 best_score = move_score
             
-            """Determine a new upper bound -> this node's value <= beta"""
+            # Determine a new upper bound -> this node's value <= beta
             beta = min(best_score, beta)
 
             if beta <= alpha:
-                """If we know that the maximizer will choose a value greater than our current upper bound, we leave this node"""
+                # If we know that the maximizer will choose a value greater than our current upper bound, we leave this node
                 break
         return best_score
