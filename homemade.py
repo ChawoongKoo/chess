@@ -11,9 +11,11 @@ from lib.lichess_types import MOVE, HOMEMADE_ARGS_TYPE
 import logging
 import math
 from engines.piece_value import value
-from engines.evaluate import evaluate
+from engines.evaluate import basic_evaluate, relative_evaluate
 import yaml
 
+# Tells you which evaluate function to use
+evaluate = relative_evaluate
 
 # Use this logger variable to print messages to the console or log files.
 # logger.info("message") will always print "message" to the console or log file.
@@ -109,8 +111,8 @@ class MiniMax(MinimalEngine):
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
         logger.info(f"Pre move eval: {evaluate(board=board)}")
-        best_move = None #Logger variable
-        best_score = 0 #Logger variable
+        best_move = None 
+        best_score = 0 
         alpha = -math.inf
         beta = math.inf
 
@@ -118,21 +120,25 @@ class MiniMax(MinimalEngine):
             max_move_score = -math.inf
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.maxi(board=board, alpha=alpha, beta=beta, depth=homemade_depth)
+                move_score = self.mini(board=board, alpha=alpha, beta=beta, depth=homemade_depth-1)
+                board.pop()
+
                 if move_score > max_move_score:
                     best_move = move
                     max_move_score = move_score
-                board.pop()
+                    alpha = max(max_move_score, alpha)
             best_score = max_move_score
         else:
             min_move_score = math.inf
             for move in board.legal_moves:
                 board.push(move)
-                move_score = self.mini(board=board, alpha=alpha, beta=beta, depth=homemade_depth)
+                move_score = self.maxi(board=board, alpha=alpha, beta=beta, depth=homemade_depth-1)
+                board.pop()
+                
                 if move_score < min_move_score:
                     min_move_score = move_score
                     best_move = move
-                board.pop()
+                    beta = min(min_move_score, beta)
             best_score = min_move_score
         
         logger.info(f"Best move: {board.san(best_move)}")
@@ -190,3 +196,57 @@ class MiniMax(MinimalEngine):
                 # If we know that the maximizer will choose a value greater than our current upper bound, we leave this node
                 break
         return best_score
+
+
+class NegaMax(MinimalEngine):
+    """Negamax algorithm"""
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        alpha = -math.inf
+        beta = math.inf
+        best_move: chess.Move
+        best_score: float = -math.inf
+
+        for move in board.legal_moves:
+            # Im making a move, so the resulting call has to be from the perspective of my opponent
+            board.push(move=move)
+            move_score = -self.negamax(board=board, alpha=-beta, beta=-alpha, depth=homemade_depth-1)
+            board.pop()
+
+            if move_score > best_score:
+                best_score = move_score
+                best_move = move
+                # I have to keep updating alpha as I go, or it won't prune correctly as I got down other branches
+                alpha = max(best_score, alpha)
+        
+        logger.info(f"Best score: {best_score}")
+        logger.info(f"Best move: {best_move}")
+        logger.info(f"Board eval: {evaluate(board=board)}")
+        return PlayResult(move=best_move, ponder=None)
+
+
+    def negamax(self, board: chess.Board, alpha: float, beta: float, depth: int) -> float:
+        """The worst position for the opponent is the best position for you"""
+
+        if depth == 0 or board.is_game_over():
+            # Returns evaluation from your persepective, regardless of color
+            # If i'm losing, negative. If i'm winning, positive
+            return evaluate(board=board)
+
+        best_score = -math.inf
+        for move in board.legal_moves:
+            board.push(move=move)
+            move_score = -self.negamax(board=board, alpha=-beta, beta=-alpha, depth=depth-1)
+            board.pop()
+
+            if move_score > best_score:
+                # Max(a,b) = -Min(-a,-b)
+                # Scores are from your point of view
+                best_score = move_score
+                alpha = max(best_score, alpha)
+
+                if beta <= alpha:
+                    break
+            
+        return best_score
+
