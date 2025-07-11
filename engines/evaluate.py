@@ -2,19 +2,51 @@ import chess
 from engines.piece_value import value
 import math
 
-def evaluate(board: chess.Board) -> float:
-    score = 0
-    for square, piece in board.piece_map().items():
-        if piece.color:
-            score += value(piece.piece_type)
-        else:
-            score -= value(piece.piece_type)
 
-    score += mobility_both_sides(board=board)*.1
+# def evaluate(board: chess.Board) -> float:
+#     score = 0
+
+#     """Add up piece values"""
+#     for square, piece in board.piece_map().items():
+#         if piece.color:
+#             score += value(piece.piece_type)
+#         else:
+#             score -= value(piece.piece_type)
+
+#     """Add up """
+#     white_mobility, black_mobility = mobility_both_sides(board=board)
+#     score += (white_mobility-black_mobility)*.1
+
+#     return score
+
+def evaluate(board: chess.Board) -> float:
+    """Evaluates score of the current board"""
+    if board.is_checkmate():
+        return -math.inf if board.turn else math.inf
+    score = 0
+
+    white_pieces, black_pieces = piece_score(board=board)
+    score += white_pieces - black_pieces
+
+    white_mobility, black_mobility = mobility_score(board=board)
+    score += (white_mobility - black_mobility)*.1
     return score
 
-def mobility_both_sides(board: chess.Board) -> float:
-    score = 0
+
+def piece_score(board: chess.Board) -> tuple:
+    """Returns weighted piece total of each side"""
+    white_pieces, black_pieces = 0,0
+    for square, piece in board.piece_map().items():
+        if piece.color:
+            white_pieces += value(piece.piece_type)
+        else:
+            black_pieces += value(piece.piece_type)
+    return white_pieces, black_pieces
+
+
+def mobility_score(board: chess.Board) -> tuple:
+    """Returns total number of legal moves for each side"""
+
     white_mobility = 0
     black_mobility = 0
     if board.turn:
@@ -28,14 +60,4 @@ def mobility_both_sides(board: chess.Board) -> float:
         white_mobility = board.legal_moves.count()
         board.turn = not board.turn
     
-    score = white_mobility - black_mobility
-    return score
-
-# def evaluate(board: chess.Board) -> float:
-#     score = 0
-#     for piece in board.piece_map().values():
-#         if piece.color:
-#             score += value(piece.piece_type)
-#         else:
-#             score -= value(piece.piece_type)
-#     return score
+    return white_mobility, black_mobility
