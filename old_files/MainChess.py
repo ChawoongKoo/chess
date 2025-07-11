@@ -3,9 +3,10 @@ import os
 import time
 import random
 
-board = chess.Board()
-
+board = chess.Board(fen="2k2q2/Q7/1K6/8/8/8/8/8 w - - 0 1")
+print(board)
 print(board.legal_moves)
+
 def random_move() -> chess.Move:
     return random.choice(list(board.legal_moves))
 
