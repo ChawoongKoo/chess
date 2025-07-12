@@ -51,7 +51,7 @@ class Matchmaking:
         self.last_challenge_created_delay = Timer(seconds(25))  # Challenges expire after 20 seconds.
         self.last_game_ended_delay = Timer(minutes(self.matchmaking_cfg.challenge_timeout))
         self.last_user_profile_update_time = Timer(minutes(5))
-        self.min_wait_time = seconds(10)
+        self.min_wait_time = seconds(1)
         # self.min_wait_time = seconds(60)  # Wait before new challenge to avoid api rate limits.
 
         # Maximum time between challenges, even if there are active games
