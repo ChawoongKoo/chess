@@ -21,8 +21,9 @@ import math
 
 def basic_evaluate(board: chess.Board) -> float:
     """Evaluates score of the current board, absolute (white winning -> positive)"""
+
     if board.is_checkmate():
-        return -math.inf if board.turn else math.inf
+        return -200. if board.turn else 200.
     score = 0
 
     white_pieces, black_pieces = piece_score(board=board)
@@ -34,6 +35,10 @@ def basic_evaluate(board: chess.Board) -> float:
 
 
 def relative_evaluate(board: chess.Board) -> float:
+    """Evaluates score of the current board, relative (White's turn and winning -> positive)"""
+
+    if board.is_checkmate():
+        return -200.
     score = 0
 
     # Add up piece values
@@ -51,6 +56,7 @@ def relative_evaluate(board: chess.Board) -> float:
 
 def piece_score(board: chess.Board) -> tuple:
     """Returns weighted piece total of each side"""
+
     white_pieces, black_pieces = 0,0
     for square, piece in board.piece_map().items():
         if piece.color:
