@@ -134,7 +134,7 @@ class MiniMax(MinimalEngine):
                 board.push(move)
                 move_score = self.maxi(board=board, alpha=alpha, beta=beta, depth=homemade_depth-1)
                 board.pop()
-                
+
                 if move_score < min_move_score:
                     min_move_score = move_score
                     best_move = move
@@ -228,10 +228,14 @@ class NegaMax(MinimalEngine):
     def negamax(self, board: chess.Board, alpha: float, beta: float, depth: int) -> float:
         """The worst position for the opponent is the best position for you"""
 
-        if depth == 0 or board.is_game_over():
+        if depth == 0:
             # Returns evaluation from your persepective, regardless of color
             # If i'm losing, negative. If i'm winning, positive
             return evaluate(board=board)
+        if board.is_game_over():
+            # Worse for me if opponent beats me sooner
+            ### Not sure what happens when draw, must debug
+            return evaluate(board=board) - depth
 
         best_score = -math.inf
         for move in board.legal_moves:
