@@ -1,4 +1,5 @@
 import chess
+from engines.piece_value import value
 from engines.evaluate import basic_evaluate, relative_evaluate, mobility_score, piece_score
 from homemade import MiniMax
 import unittest.mock as mock
@@ -15,6 +16,26 @@ def test_starting_board() -> None:
     assert relative_evaluate(board=board) == 0
 
 
+def test_basic_evaluate_stalemate() -> None:
+    """Assert that a stalemate returns score of 0"""
+
+    board = chess.Board(fen="7k/4Q3/7K/8/8/8/8/8 w - - 0 1")
+    board.push_san("Qf7")
+
+    assert board.is_stalemate()
+    assert basic_evaluate(board=board) == 0
+
+
+def test_relative_evaluate_stalemate() -> None:
+    """Assert that a stalemate returns a score of 0"""
+
+    board = chess.Board(fen="7k/4Q3/7K/8/8/8/8/8 w - - 0 1")
+    board.push_san("Qf7")
+
+    assert board.is_stalemate()
+    assert relative_evaluate(board=board) == 0
+
+
 def test_basic_evaluate_checkmate() -> None:
     """Assert that a checkmate returns a maximum/minimum score"""
 
@@ -22,14 +43,14 @@ def test_basic_evaluate_checkmate() -> None:
     board1 = chess.Board(fen="7k/5Q2/7K/8/8/8/8/8 w - - 0 1")
     board1.push_san("Qh7")
     assert board1.is_checkmate()
-    assert basic_evaluate(board1) == math.inf
+    assert basic_evaluate(board1) == value(chess.KING)
 
     # Black queen checkmate
     board2 = chess.Board(fen="7K/5q2/7k/8/8/8/8/8 w - - 0 1")
     board2.turn = chess.BLACK
     board2.push_san("Qh7")
     assert board2.is_checkmate()
-    assert basic_evaluate(board2) == -math.inf
+    assert basic_evaluate(board2) == -value(chess.KING)
 
 
 def test_relative_evaluate_checkmate() -> None:
@@ -39,14 +60,16 @@ def test_relative_evaluate_checkmate() -> None:
     board1 = chess.Board(fen="7k/5Q2/7K/8/8/8/8/8 w - - 0 1")
     board1.push_san("Qh7")
     assert board1.is_checkmate()
-    assert relative_evaluate(board1) == math.inf
+    assert board1.turn == chess.BLACK
+    assert relative_evaluate(board1) == -value(chess.KING)
 
     # Black queen checkmate
     board2 = chess.Board(fen="7K/5q2/7k/8/8/8/8/8 w - - 0 1")
     board2.turn = chess.BLACK
     board2.push_san("Qh7")
     assert board2.is_checkmate()
-    assert relative_evaluate(board2) == -math.inf
+    assert board2.turn == chess.WHITE
+    assert relative_evaluate(board2) == -value(chess.KING)
 
 
 def test_basic_evaluate_mobility_scoring() -> None:
