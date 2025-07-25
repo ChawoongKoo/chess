@@ -13,6 +13,7 @@ import math
 from engines.piece_value import value
 from engines.evaluate import basic_evaluate, relative_evaluate
 import yaml
+from engines.sort_moves import MVV_LVA
 
 # Tells you which evaluate function to use
 evaluate = relative_evaluate
@@ -206,8 +207,10 @@ class NegaMax(MinimalEngine):
         beta = math.inf
         best_move: chess.Move
         best_score: float = -math.inf
-
-        for move in board.legal_moves:
+        
+        # Sort moves by most valuable victim/least valuable aggressor heuristic
+        legal_moves = MVV_LVA(board=board)
+        for move in legal_moves:
             # Im making a move, so the resulting call has to be from the perspective of my opponent
             board.push(move=move)
             move_score = -self.negamax(board=board, alpha=-beta, beta=-alpha, depth=homemade_depth-1)
@@ -238,7 +241,10 @@ class NegaMax(MinimalEngine):
             return evaluate(board=board) - depth
 
         best_score = -math.inf
-        for move in board.legal_moves:
+
+        # Sort moves by most valuable victim/least valuable aggressor heuristic
+        legal_moves = MVV_LVA(board=board)
+        for move in legal_moves:
             board.push(move=move)
             move_score = -self.negamax(board=board, alpha=-beta, beta=-alpha, depth=depth-1)
             board.pop()
