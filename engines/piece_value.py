@@ -9,5 +9,7 @@ values = {
     chess.KING: 200.
 }
 
-def value(piece: chess.PieceType) -> float:
+def value(piece: chess.PieceType | None) -> float:
+    if piece is None:
+        raise Exception("Value function passed a piece with no value")
     return values[piece]
