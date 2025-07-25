@@ -11,7 +11,7 @@ import math
 #     sorted = []
 #     for move in legal_moves:
 
-def MVV_LVA(self, board: chess.Board) -> list[chess.Move]:
+def MVV_LVA(board: chess.Board) -> list[chess.Move]:
     """Most Valuable Victim, Least Valuable Aggressor"""
 
     def piece_difference(move: chess.Move) -> float:
