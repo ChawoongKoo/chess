@@ -15,6 +15,8 @@ from engines.evaluate import basic_evaluate, relative_evaluate
 import yaml
 from engines.sort_moves import MVV_LVA
 
+import time
+
 # Tells you which evaluate function to use
 evaluate = relative_evaluate
 
@@ -23,6 +25,7 @@ evaluate = relative_evaluate
 # logger.debug("message") will only print "message" if verbose logging is enabled.
 logger = logging.getLogger(__name__)
 
+# Adjustable search depth from config
 with open("config.yml", "r") as file:
     config = yaml.safe_load(file)
 homemade_depth = config["engine"]["homemade_options"]["depth"]
@@ -203,6 +206,7 @@ class NegaMax(MinimalEngine):
     """Negamax algorithm"""
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        start = time.time()
         alpha = -math.inf
         beta = math.inf
         best_move: chess.Move
@@ -225,6 +229,9 @@ class NegaMax(MinimalEngine):
         logger.info(f"Best score: {best_score}")
         logger.info(f"Best move: {best_move}")
         logger.info(f"Board eval: {evaluate(board=board)}")
+
+        end = time.time()
+        logger.info(f"Time taken: {end-start:.2f} seconds")
         return PlayResult(move=best_move, ponder=None)
 
 
@@ -260,3 +267,33 @@ class NegaMax(MinimalEngine):
             
         return best_score
 
+
+
+
+# class NegaMaxIterativeDeepening(NegaMax):
+#     """Negamax algorithm using iterative deepening"""
+
+#     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:  # noqa: ARG002
+#         alpha = -math.inf
+#         beta = math.inf
+#         best_move: chess.Move
+#         best_score: float = -math.inf
+
+#         transposition_table = {}
+
+#         for depth in range(1, homemade_depth+1):
+#             pass
+    
+#     def search_at_depth(self, board: chess.Board, depth: int, alpha: float, beta: float) -> tuple:
+#         """Searches the move tree to a given depth, returns (best_move, score)"""
+
+#         best_score = 0
+#         for move in board.legal_moves:
+#             board.push(move)
+#             move_score = -super().negamax(board=board, alpha=-beta, beta=-alpha, depth=depth-1)
+#             board.pop()
+
+#             if move_score > best_score:
+#                 best_score = move_score
+#                 alpha = best_score
+            
