@@ -211,12 +211,13 @@ class NegaMax(MinimalEngine):
         beta = math.inf
         best_move: chess.Move
         best_score: float = -math.inf
-        
+        self.positions_searched = 0
         # Sort moves by most valuable victim/least valuable aggressor heuristic
         legal_moves = MVV_LVA(board=board)
         for move in legal_moves:
             # Im making a move, so the resulting call has to be from the perspective of my opponent
             board.push(move=move)
+            self.positions_searched+=1
             move_score = -self.negamax(board=board, alpha=-beta, beta=-alpha, depth=homemade_depth-1)
             board.pop()
 
@@ -232,6 +233,7 @@ class NegaMax(MinimalEngine):
 
         end = time.time()
         logger.info(f"Time taken: {end-start:.2f} seconds")
+        logger.info(f"Positions searched: {self.positions_searched}")
         return PlayResult(move=best_move, ponder=None)
 
 
@@ -243,16 +245,17 @@ class NegaMax(MinimalEngine):
             # If i'm losing, negative. If i'm winning, positive
             return evaluate(board=board)
         if board.is_game_over():
+            if board.is_checkmate():
             # Worse for me if opponent beats me sooner
-            ### Not sure what happens when draw, must debug
-            return evaluate(board=board) - depth
-
+                return evaluate(board=board) - depth
+            return evaluate(board=board)
         best_score = -math.inf
 
         # Sort moves by most valuable victim/least valuable aggressor heuristic
         legal_moves = MVV_LVA(board=board)
         for move in legal_moves:
             board.push(move=move)
+            self.positions_searched+=1
             move_score = -self.negamax(board=board, alpha=-beta, beta=-alpha, depth=depth-1)
             board.pop()
 
