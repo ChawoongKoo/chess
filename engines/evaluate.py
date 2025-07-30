@@ -39,9 +39,10 @@ def basic_evaluate(board: chess.Board) -> float:
 def relative_evaluate(board: chess.Board) -> float:
     """Evaluates score of the current board, relative (White's turn and winning -> positive)"""
 
-    if board.is_checkmate():
-        return -value(chess.KING)
-    elif board.is_stalemate():
+    if board.outcome():
+        if board.is_checkmate():
+            return -value(chess.KING)
+        ### DOES NOT WORK FOR VARIANTS
         return 0
     score = 0
 
