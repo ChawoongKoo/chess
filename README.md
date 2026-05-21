@@ -1,14 +1,14 @@
-# chess
-I made this chess ai bot during the summer after my college graduation. 
-I was really bored and wanted something fun to do that could distract me from other work.
-
-Currently at a rating of >1300.
-=======
 # Chess Engine
 >>>>>>> 3e60693 (updated readme)
 
 A from-scratch chess engine written in Python that plays on [Lichess](https://lichess.org) via the Lichess Bot API.
 
+=======
+# Chess Engine
+
+A from-scratch chess engine written in Python that plays on [Lichess](https://lichess.org) via the Lichess Bot API.
+
+>>>>>>> 3e60693 (updated readme)
 The goal of this project is to build a competitive chess engine the hard way — implementing search, evaluation, and the supporting data structures myself rather than wrapping an existing engine like Stockfish.
 
 ## Highlights
