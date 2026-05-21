@@ -41,7 +41,7 @@ def relative_evaluate(board: chess.Board) -> float:
 
     if board.outcome():
         if board.is_checkmate():
-            return -value(chess.KING)
+            return -1e4
         ### DOES NOT WORK FOR VARIANTS
         return 0
     score = 0
